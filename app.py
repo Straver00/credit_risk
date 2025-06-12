@@ -1,9 +1,8 @@
-import pandas as pd
 from flask import Flask, render_template, request
-from keras import models
-import joblib
 from keras.models import load_model
+import joblib
 import numpy as np
+
 
 app = Flask(__name__)
 
