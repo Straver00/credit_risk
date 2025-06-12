@@ -3,7 +3,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import onnxruntime as ort
 import numpy as np
 import json
@@ -65,6 +65,40 @@ def codificar_formulario_modificado(data):
 
     return resultado
 
+def realizar_prediccion(form_data):
+    """Función centralizada para realizar predicciones"""
+    try:
+        # Preprocesamiento
+        datos_codificados = codificar_formulario_modificado(form_data)
+        entrada = np.array([datos_codificados], dtype=np.float32)
+        
+        # Escalar solo las primeras 2 columnas
+        entrada_escalada = entrada.copy()
+        entrada_escalada[:, :2] = scale.transform(entrada[:, :2])
+
+        # Predicción con ONNX
+        prediccion = session.run(
+            [output_name], 
+            {input_name: entrada_escalada}
+        )[0][0][0]
+
+        # Aplicar umbral
+        resultado = True if prediccion <= 0.4046 else False
+        
+        print(f"Predicción: {prediccion:.4f} -> {'Aprobado' if resultado else 'Rechazado'}")
+        
+        return {
+            'score': float(prediccion),
+            'approved': resultado,
+            'threshold': 0.4046
+        }
+        
+    except Exception as e:
+        print(f"❌ Error en predicción: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
 # Configuración optimizada de ONNX Runtime
 def crear_session_optimizada():
     """Crea una sesión ONNX optimizada"""
@@ -88,7 +122,6 @@ def crear_session_optimizada():
         return None
 
 # Cargar modelo y scaler una sola vez al iniciar
-print("🚀 Cargando modelo ONNX...")
 session = crear_session_optimizada()
 
 # Verificar que el modelo se cargó correctamente
@@ -121,59 +154,24 @@ except Exception as e:
 @app.route("/", methods=["GET", "POST"])
 def index():
     resultado = None
+    prediccion_score = None
     
     if request.method == "POST":
-        try:
-            # Procesar datos del formulario
-            form_data = request.form.to_dict()
-            form_data["ingresos_verificables"] = "ingresos_verificables" in request.form
+        # Procesar datos del formulario
+        form_data = request.form.to_dict()
+        form_data["ingresos_verificables"] = "ingresos_verificables" in request.form
 
-            # Preprocesamiento
-            datos_codificados = codificar_formulario_modificado(form_data)
-            entrada = np.array([datos_codificados], dtype=np.float32)
-            
-            # Escalar solo las primeras 2 columnas
-            entrada_escalada = entrada.copy()
-            entrada_escalada[:, :2] = scale.transform(entrada[:, :2])
-
-            # Predicción con ONNX
-            prediccion = session.run(
-                [output_name], 
-                {input_name: entrada_escalada}
-            )[0][0][0]
-
-            # Aplicar umbral
-            resultado = True if prediccion <= 0.4046 else False
-            
-            print(f"Predicción: {prediccion:.4f} -> {'Aprobado' if resultado else 'Rechazado'}")
-
-        except Exception as e:
-            print(f"❌ Error en predicción: {e}")
-            import traceback
-            traceback.print_exc()
-            resultado = None
-
-    return render_template("index.html", resultado=resultado)
-
-@app.route("/health")
-def health_check():
-    """Endpoint para verificar que la aplicación funciona"""
-    try:
-        # Hacer una predicción de prueba
-        datos_prueba = np.array([[50000.0, 75000.0] + [-1.0] * 28], dtype=np.float32)
-        datos_escalados = datos_prueba.copy()
-        datos_escalados[:, :2] = scale.transform(datos_prueba[:, :2])
+        # Realizar predicción
+        prediction_result = realizar_prediccion(form_data)
         
-        pred = session.run([output_name], {input_name: datos_escalados})[0][0][0]
-        
-        return {
-            "status": "ok", 
-            "model_loaded": True,
-            "test_prediction": float(pred)
-        }
-    except Exception as e:
-        return {"status": "error", "message": str(e)}, 500
+        if prediction_result:
+            resultado = prediction_result['approved']
+            prediccion_score = prediction_result['score']
+
+    return render_template("index.html", 
+                         resultado=resultado, 
+                         prediccion_score=prediccion_score)
 
 if __name__ == "__main__":
-    print("🌟 Aplicación iniciada con ONNX Runtime")
+
     app.run(debug=True)

@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Score de Riesgo</title>
+  <title>Score de Riesgo - RNA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="static/credit-risk-logo.ico" type="image/x-icon">
   <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
@@ -31,7 +32,7 @@
       <br>
 
       <label>¿Sus ingresos son verificables?:
-        <input type="checkbox" name="ingresos_verificables" value="True">
+        Si<input type="checkbox" name="ingresos_verificables" value="True">
       </label>
       <br>
 
@@ -98,6 +99,7 @@
         <span class="cerrar">&times;</span>
         <h2>Resultado del análisis</h2>
         <p id="mensajeResultado"></p>
+        <div id="scoreInfo"></div>
       </div>
     </div>
   </main>
@@ -106,13 +108,32 @@
     const modal = document.getElementById('modalResultado');
     const cerrar = document.querySelector('.cerrar');
     const mensaje = document.getElementById('mensajeResultado');
+    const scoreInfo = document.getElementById('scoreInfo');
 
     {% if resultado is not none %}
       modal.style.display = 'block';
+      
       {% if resultado %}
-        mensaje.textContent = "✅ Crédito aprobado";
+        mensaje.innerHTML = '<div style="color: #28a745; font-size: 1.5em; font-weight: bold;">✅ Crédito aprobado</div>';
       {% else %}
-        mensaje.textContent = "❌ Crédito no aprobado";
+        mensaje.innerHTML = '<div style="color: #dc3545; font-size: 1.5em; font-weight: bold;">❌ Crédito no aprobado</div>';
+      {% endif %}
+      
+      {% if prediccion_score is not none %}
+        scoreInfo.innerHTML = `
+          <h3>Análisis con Modelo ONNX</h3>
+          <p><strong>Score de Riesgo:</strong> {{ "%.2f"|format(prediccion_score * 100) }}%</p>
+          <p><strong>Umbral de Aprobación:</strong> 40.46%</p>
+          <p><strong>Decisión:</strong> {{ 'APROBADO' if resultado else 'RECHAZADO' }}</p>
+          <hr style="margin: 15px 0;">
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
+            <p><strong>🤖 Procesado con Inteligencia Artificial</strong></p>
+            <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+              Este análisis utiliza un modelo de machine learning entrenado con ONNX Runtime 
+              para evaluar múltiples factores de riesgo crediticio de forma simultánea.
+            </p>
+          </div>
+        `;
       {% endif %}
     {% endif %}
 
