@@ -7,25 +7,6 @@ modelo = load_model("modelo/bestModel.keras")
 scale = joblib.load("modelo/scalerMinMax.pkl")
 print(modelo.summary())
 
-# entrada = np.array([[
-#     30000,      # monto
-#     100000,     # ingreso
-#     -1,         # verificación
-
-#     # term (solo term_36 en este caso)
-#     -1,
-
-#     # empleo (sin info → emp_n/a)
-#     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-
-#     # propiedad (rentado)
-#     -1, -1, 1,
-
-#     # propósito (educativo)
-#     -1, -1, -1,
-#     -1,
-#     -1, -1, -1, -1, -1, -1, -1, -1, -1
-# ]], dtype='float32')
 
 def codificar_formulario_modificado(data):
     resultado = []
@@ -89,10 +70,4 @@ entrada[:, :2] = scale.transform(entrada[:, :2])
 prediccion = modelo.predict(entrada)
 
 # Mostrar resultado
-print("Resultado:", prediccion[0][0])
-
-# Si es binario (por ejemplo, 0: no aprobado, 1: aprobado)
-if prediccion[0][0] < 0.5:
-    print("✅ Crédito aprobado (clase 1)")
-else:
-    print("❌ Crédito no aprobado (clase 0)")
+print("Resultado:", prediccion)
