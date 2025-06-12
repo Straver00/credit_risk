@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Score de Riesgo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Calculadora de Score de Riesgo</h1>
+    <h2>Material Adicional</h2>
+    <ul>
+      <li><a href="https://www.google.com" target="_blank">📄 Ver Reporte Técnico</a></li>
+      <li><a href="https://www.google.com" target="_blank">🎯 Ver Material Publicitario</a></li>
+    </ul>
+  </header>
+  <main>
+    
+    <h1>Calculadora de Score de Riesgo</h1>
+
+    <form method="POST">
+      <label>Monto del préstamo ($):
+        <input type="number" min="0" name="monto" required>
+      </label>
+      <br>
+
+      <label>Ingresos anuales ($):
+        <input type="number" min="0" name="ingresos" step="any" required>
+      </label>
+      <br>
+
+      <label>¿Sus ingresos son verificables?:
+        <input type="checkbox" name="ingresos_verificables" value="True">
+      </label>
+      <br>
+
+      <label>Tiempo de pago del préstamo (meses):
+        <select name="tiempo_pago" required>
+          <option value="36">36 meses</option>
+          <option value="60">60 meses</option>
+        </select>
+      </label>
+      <br>
+
+      <label>Duración de su empleo actual:
+        <select name="tiempo_trabajo" required>
+          <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+          <option value="<1">&lt;1</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10+">10+</option>
+        </select>
+      </label>
+      <br>
+
+      <label>Tipo de propiedad:
+        <select name="tipo_propiedad" required>
+          <option value="hipoteca">Hipoteca</option>
+          <option value="propia">Propia</option>
+          <option value="alquiler">Alquiler</option>
+          <option value="otro">Otro</option>
+        </select>
+      </label>
+      <br>
+
+      <label>Propósito del préstamo:
+        <select name="proposito_prestamo" required>
+          <option value="carro">Carro</option>
+          <option value="tarjeta_credito">Tarjeta de crédito</option>
+          <option value="consolidar_debito">Consolidar débito</option>
+          <option value="educativo">Educativo</option>
+          <option value="mejorar_casa">Mejorar casa</option>
+          <option value="comprar_casa">Comprar casa</option>
+          <option value="compra_importante">Compra importante</option>
+          <option value="salud">Salud</option>
+          <option value="mudanza">Mudanza</option>
+          <option value="energia_renovable">Energía renovable</option>
+          <option value="microempresa">Microempresa</option>
+          <option value="vacaciones">Vacaciones</option>
+          <option value="boda">Boda</option>
+          <option value="otro">Otro</option>
+        </select>
+      </label>
+      <br><br>
+
+      <button type="submit">Calcular Score</button>
+    </form>
+    <div id="modalResultado" class="modal">
+      <div class="modal-contenido">
+        <span class="cerrar">&times;</span>
+        <h2>Resultado del análisis</h2>
+        <p id="mensajeResultado"></p>
+      </div>
+    </div>
+  </main>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modalResultado');
+    const cerrar = document.querySelector('.cerrar');
+    const mensaje = document.getElementById('mensajeResultado');
+
+    {% if resultado is not none %}
+      modal.style.display = 'block';
+      {% if resultado %}
+        mensaje.textContent = "✅ Crédito aprobado";
+      {% else %}
+        mensaje.textContent = "❌ Crédito no aprobado";
+      {% endif %}
+    {% endif %}
+
+    cerrar.onclick = () => {
+      modal.style.display = 'none';
+    };
+
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    };
+  });
+</script>
+</body>
+</html>
