@@ -71,3 +71,5 @@ prediccion = modelo.predict(entrada)
 
 # Mostrar resultado
 print("Resultado:", prediccion)
+
+from utils.visuals import generate_base_hist_svg
