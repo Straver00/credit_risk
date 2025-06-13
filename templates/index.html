@@ -110,32 +110,41 @@
     const mensaje = document.getElementById('mensajeResultado');
     const scoreInfo = document.getElementById('scoreInfo');
 
-    {% if resultado is not none %}
-      modal.style.display = 'block';
-      
-      {% if resultado %}
-        mensaje.innerHTML = '<div style="color: #28a745; font-size: 1.5em; font-weight: bold;">✅ Crédito aprobado</div>';
-      {% else %}
-        mensaje.innerHTML = '<div style="color: #dc3545; font-size: 1.5em; font-weight: bold;">❌ Crédito no aprobado</div>';
-      {% endif %}
-      
-      {% if prediccion_score is not none %}
-        scoreInfo.innerHTML = `
-          <h3>Análisis con Modelo ONNX</h3>
-          <p><strong>Score de Riesgo:</strong> {{ "%.2f"|format(prediccion_score * 100) }}%</p>
-          <p><strong>Umbral de Aprobación:</strong> 40.46%</p>
-          <p><strong>Decisión:</strong> {{ 'APROBADO' if resultado else 'RECHAZADO' }}</p>
-          <hr style="margin: 15px 0;">
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
-            <p><strong>🤖 Procesado con Inteligencia Artificial</strong></p>
-            <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
-              Este análisis utiliza un modelo de machine learning para evaluar múltiples factores
-              de riesgo crediticio de forma simultánea.
-            </p>
-          </div>
-        `;
-      {% endif %}
+  {% if resultado is not none %}
+    modal.style.display = 'block';
+
+    {% if resultado %}
+      mensaje.innerHTML = '<div style="color: #28a745; font-size: 1.5em; font-weight: bold;">✅ Crédito aprobado</div>';
+    {% else %}
+      mensaje.innerHTML = '<div style="color: #dc3545; font-size: 1.5em; font-weight: bold;">❌ Crédito no aprobado</div>';
     {% endif %}
+
+    scoreInfo.innerHTML = `
+      <h3>Análisis con Modelo ONNX</h3>
+      <p><strong>Probabilidad de Riesgo:</strong> {{ "%.2f"|format(prediccion_score * 100) }}%</p>
+      <p><strong>Umbral de Aprobación:</strong> 40.46%</p>
+      <p><strong>Score Crediticio:</strong> {{ credit_score }}</p>
+      
+      <p><strong>Decisión:</strong> {{ 'APROBADO' if resultado else 'RECHAZADO' }}</p>
+      <hr style="margin: 15px 0;">
+            {% if histograma %}
+        <div style="margin-top: 20px;">
+          <h4>Distribución del Scorecard</h4>
+          <img src="{{ url_for('static', filename='histogram.png') }}" alt="Histograma del scorecard"
+              style="max-width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
+        </div>
+      {% endif %}
+      <hr style="margin: 15px 0;">
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
+        <p><strong>🤖 Procesado con Inteligencia Artificial</strong></p>
+        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+          Este análisis utiliza un modelo de machine learning para evaluar múltiples factores
+          de riesgo crediticio de forma simultánea.
+        </p>
+      </div>
+    `;
+  {% endif %}
+
 
     cerrar.onclick = () => {
       modal.style.display = 'none';
