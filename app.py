@@ -10,7 +10,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# Inicialización de modelo y scaler
+# Inicialización del modelo y scaler
 session = crear_session_optimizada()
 if session is None:
     raise Exception("No se pudo cargar el modelo ONNX")
@@ -18,8 +18,6 @@ if session is None:
 input_name = session.get_inputs()[0].name
 output_name = session.get_outputs()[0].name
 scale = cargar_scaler()
-
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -32,14 +30,17 @@ def index():
     if request.method == "POST":
         form_data = request.form.to_dict()
         form_data["ingresos_verificables"] = "ingresos_verificables" in request.form
-        prediction_result = realizar_prediccion(form_data, session, scale, input_name, output_name, valores_df)
 
+        try:
+            prediction_result = realizar_prediccion(form_data, session, scale, input_name, output_name, valores_df)
+            if prediction_result:
+                resultado = prediction_result['approved']
+                prediccion_score = prediction_result['score']
+                credit_score = prediction_result['credit_score']
+                histograma = prediction_result['histograma_path']
+        except Exception as e:
+            print("Error en la predicción:", e)
 
-        if prediction_result:
-            resultado = prediction_result['approved']
-            prediccion_score = prediction_result['score']
-            credit_score = prediction_result['credit_score']
-            histograma = prediction_result['histograma_path']
     return render_template("index.html",
                            resultado=resultado,
                            prediccion_score=prediccion_score,
