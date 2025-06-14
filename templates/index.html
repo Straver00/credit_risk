@@ -21,12 +21,12 @@
     <h1>Calculadora de Score de Riesgo</h1>
 
     <form method="POST">
-      <label>Monto del préstamo (Dólares):
+      <label>Monto del préstamo (en dólares):
         <input type="number" min="0" name="monto" required>
       </label>
       <br>
 
-      <label>Ingresos anuales ($):
+      <label>Ingresos anuales (en dólares):
         <input type="number" min="0" name="ingresos" step="any" required>
       </label>
       <br>
@@ -120,7 +120,7 @@
     {% endif %}
 
     scoreInfo.innerHTML = `
-      <h3>Análisis con Modelo ONNX</h3>
+      <h3>Análisis con Modelo Neuronal</h3>
       <p><strong>Probabilidad de Riesgo:</strong> {{ "%.2f"|format(prediccion_score * 100) }}%</p>
       <p><strong>Umbral de Aprobación:</strong> 40.46%</p>
       <p><strong>Score Crediticio:</strong> {{ credit_score }}</p>
